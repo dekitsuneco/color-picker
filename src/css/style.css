@@ -8,3 +8,131 @@
 li {
   list-style: none;
 }
+
+/*
+* Redifine library styles:
+*/
+
+body {
+  background: #eeeeee;
+  margin: 20px;
+}
+
+.colorPicker {
+  background: none;
+  border: none;
+  margin: 0;
+}
+
+.colorPicker .oned {
+  margin-right: 0;
+}
+
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+.main {
+  flex: 1 1 auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: start;
+
+  padding-top: 2rem;
+}
+
+.color-widget {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 35px;
+
+  max-width: 600px;
+
+  padding: 20px;
+
+
+  background-color: #fff;
+
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+  .color-widget__picker {}
+
+  .color-widget__info {
+    flex-grow: 1;
+  }
+  .info {
+    padding: 0 15px;
+  }
+
+    .info__selected-colors {}
+    .selected-colors {}
+    
+      .selected-colors__title {
+        margin-bottom: 10px;
+
+
+        font-family: sans-serif;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: bold;
+      }
+
+      .selected-colors__color-name {
+        margin-bottom: 10px;
+
+
+        font-family: monospace;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .selected-colors__color {
+        width: 200px;
+        min-width: 100%;
+        height: 1rem;
+
+        margin-bottom: 17px;
+
+
+        border: 1px solid rgba(0, 0, 0, .2);
+      }
+
+    .info__saved-colors {}
+    .saved-colors {}
+
+      .saved-colors__title {
+        margin-bottom: 10px;
+
+
+        font-family: sans-serif;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: bold;
+      }
+
+      .saved-colors__colors-list {}
+    
+        .saved-colors__color {
+          width: 200px;
+          min-width: 100%;
+          height: 1rem;
+
+          margin-bottom: 5px;
+
+
+          border: 1px solid rgba(0, 0, 0, .2);
+        }
+        .saved-colors__color:last-child {
+          margin-bottom: 0;
+        }
+
