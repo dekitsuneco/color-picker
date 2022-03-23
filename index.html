@@ -24,20 +24,23 @@
                 Selected Color
               </div>
               <div class="selected-colors__color-name">
-                #009578
+                #ffffff
               </div>
               <div class="selected-colors__color"></div>
             </div>
             <div class="info__saved-colors saved-colors">
               <div class="saved-colors__title">
+                <div class="mode-switch">
+                  🔺
+                </div>
                 Saved Colors
               </div>
               <ul class="saved-colors__colors-list">
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
+                <li data-key="0" class="saved-colors__color"></li>
+                <li data-key="1" class="saved-colors__color"></li>
+                <li data-key="2" class="saved-colors__color"></li>
+                <li data-key="3" class="saved-colors__color"></li>
+                <li data-key="4" class="saved-colors__color"></li>
               </ul>
             </div>
           </div>
@@ -46,9 +49,126 @@
     </div>
 
     <script>
-      const colorWidget = colorjoe.rgb(document.querySelector('.color-widget__picker'));
+      /**
+       * @todo Change unclear refs to more appropriate ones
+       * @todo Split code to small pure functions (methods)
+       * @todo Rewrite class more compactly
+       * @todo Add accesors for fileds related with colors instead of methods
+       * @todo Style switcher to look nice
+       * @todo Fix html and clean up CSS
+       * @todo Add types to code
+       * @todo Add background image from Build folder of my phone
+       * @todo Add blurry-loading
+       * @todo Push to GitHub
+      */
 
-      colorWidget.show();
+      class ColorWidget {
+        constructor(widgetElement) {
+
+          // Caching DOM for selected color section:
+          this.isUpdatingMode = false;
+          this.modeSwitch = document.querySelector('.mode-switch');
+          this.modeSwitch.addEventListener('click', () => {
+            const icon = this.isUpdatingMode ? '🔺' : '🔻';
+
+            this.isUpdatingMode = !this.isUpdatingMode;
+            this.modeSwitch.textContent = icon;
+          });
+
+          /**
+           * @todo Setter 
+           * @todo Getter 
+           */
+          this.selectedColor = {
+            colorNameDisplay: widgetElement.selectedColor.name,
+            colorBar: widgetElement.selectedColor.colorBar,
+            lastPicked: '#3aebca',
+          };
+          // * Reverse back to last picked from picker color on click.
+          this.selectedColor.colorBar.addEventListener('click', () => this.setSelectedColor(this.selectedColor.lastPicked));
+          this.setSelectedColor('#3aebca');
+
+          // Save HTMLElements of saved colors and actual array of the corresponding colors
+          // in one object:
+          this.savedColors = new Map();
+          this.setSavedColors(widgetElement.savedColors.colorBars);
+
+          // Init color picker:
+          this.colorPicker = colorjoe.rgb(widgetElement.colorPicker);
+          this.colorPicker.show();
+
+          // * Remember last picked color from picker
+          // and update selected color title and bar.
+          this.colorPicker.on('change', colorData => {
+            this.selectedColor.lastPicked = colorData.hex();
+            this.setSelectedColor(colorData.hex());
+          });
+        }
+
+        // Selected Color:
+        setSelectedColor(color) {
+          this.selectedColor.colorNameDisplay.textContent = color;
+          this.selectedColor.colorBar.style.background = color;
+        }
+
+        // Saved Color:
+        loadColorsFromCache() {
+          const saved = JSON.parse(localStorage.getItem('cached-colors') || '[]');
+
+          return new Array(5).fill('#ffffff').map((defaultColor, index) => saved[index] || defaultColor);
+        }
+
+        setSavedColors(colorBars) {
+          const colors = this.loadColorsFromCache();
+
+          colorBars.forEach((colorBar, key) => {
+            this.savedColors.set(colorBar, colors[key]);
+
+            colorBar.style.background = colors[key];
+
+            colorBar.addEventListener('mouseover', () => {
+              if (!this.isUpdatingMode) {
+                this.setSelectedColor(colorBar.style.background/*colors[key]*/);
+              }
+            });
+
+            colorBar.addEventListener('click', () => {
+              if (this.isUpdatingMode) {
+                //this.savedColors.set(colorBar, this.selectedColor.colorNameDisplay.textContent);
+                //colorBar.style.background = this.selectedColor.colorNameDisplay.textContent;
+                this.updateSavedColor(colorBar, key);
+              }
+            })
+          });
+        }
+
+        getSavedColors() {
+          return /*loadColorsFromCache()*/;
+        }
+
+        updateSavedColor(colorBar, key) {
+          // Update Map
+          // Update cache
+          this.savedColors.set(colorBar, this.selectedColor.colorNameDisplay.textContent);
+          colorBar.style.background = this.selectedColor.colorNameDisplay.textContent;
+
+          localStorage.setItem('cached-colors', JSON.stringify(this.savedColors.values()));
+        }
+      }
+
+      const widgetDOM = {
+        container: document.querySelector('.color-widget'),
+        colorPicker: document.querySelector('.color-widget__picker'),
+        selectedColor: {
+          name: document.querySelector('.selected-colors__color-name'),
+          colorBar: document.querySelector('.selected-colors__color'),
+        },
+        savedColors: {
+          colorBars: document.querySelectorAll('.saved-colors__color'),
+        },
+      };
+
+      const colorWidget = new ColorWidget(widgetDOM);
     </script>
   </body>
 
