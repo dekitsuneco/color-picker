@@ -62,74 +62,84 @@
        */
 
       class ColorWidget {
+        #isUpdatingMode;
+        
+        #modeSwitch;
+
+        #selectedColor;
+
+        #savedColors;
+
+        #colorPicker;
+
         constructor(widgetElement) {
           // 1. Class state:
-          this.isUpdatingMode = false;
+          this.#isUpdatingMode = false;
 
-          this.modeSwitch = widgetElement.savedColors.modeSwitch;
-          this.selectedColor = {
+          this.#modeSwitch = widgetElement.savedColors.modeSwitch;
+          this.#selectedColor = {
             colorNameDisplay: widgetElement.selectedColor.name,
             colorBar: widgetElement.selectedColor.colorBar,
             lastPicked: '#3aebca',
           };
-          this.savedColors = new Map();
-          this.colorPicker = colorjoe.rgb(widgetElement.colorPicker);
+          this.#savedColors = new Map();
+          this.#colorPicker = colorjoe.rgb(widgetElement.colorPicker);
 
           // 2. Init with basic values:
-          this.setSelectedColor('#3aebca');
-          this.setSavedColors(widgetElement.savedColors.colorBars);
-          this.colorPicker.show();
+          this.#setSelectedColor('#3aebca');
+          this.#setSavedColors(widgetElement.savedColors.colorBars);
+          this.#colorPicker.show();
 
           // 3. Event listeners:
-          this.modeSwitch.addEventListener('click', () => {
-            this.isUpdatingMode = !this.isUpdatingMode;
+          this.#modeSwitch.addEventListener('click', () => {
+            this.#isUpdatingMode = !this.#isUpdatingMode;
 
-            if (this.isUpdatingMode) {
-              this.modeSwitch.textContent = '🔻';
-              this.modeSwitch.title =
+            if (this.#isUpdatingMode) {
+              this.#modeSwitch.textContent = '🔻';
+              this.#modeSwitch.title =
                 'UPDATE: Click on saved color to replace it with currently selected';
             } else {
-              this.modeSwitch.textContent = '🔺';
-              this.modeSwitch.title =
+              this.#modeSwitch.textContent = '🔺';
+              this.#modeSwitch.title =
                 'GET: Click on saved color to set it as selected';
             }
           });
 
-          this.selectedColor.colorBar.addEventListener('click', () =>
-            this.setSelectedColor(this.selectedColor.lastPicked),
+          this.#selectedColor.colorBar.addEventListener('click', () =>
+            this.#setSelectedColor(this.#selectedColor.lastPicked),
           );
 
-          this.colorPicker.on('change', (colorData) => {
+          this.#colorPicker.on('change', (colorData) => {
             const colorInHex = colorData.hex();
 
-            this.selectedColor.lastPicked = colorInHex;
-            this.setSelectedColor(colorInHex);
+            this.#selectedColor.lastPicked = colorInHex;
+            this.#setSelectedColor(colorInHex);
           });
         }
 
-        componentToHex(color) {
+        #componentToHex(color) {
           const colorInHex = Number(color).toString(16);
 
           return colorInHex.length === 1 ? '0' + colorInHex : colorInHex;
         }
 
-        rgbToHex([r, g, b]) {
+        #rgbToHex([r, g, b]) {
           return (
             '#' +
-            this.componentToHex(r) +
-            this.componentToHex(g) +
-            this.componentToHex(b)
+            this.#componentToHex(r) +
+            this.#componentToHex(g) +
+            this.#componentToHex(b)
           );
         }
 
         // Selected Color:
-        setSelectedColor(color) {
-          this.selectedColor.colorNameDisplay.textContent = color;
-          this.selectedColor.colorBar.style.background = color;
+        #setSelectedColor(color) {
+          this.#selectedColor.colorNameDisplay.textContent = color;
+          this.#selectedColor.colorBar.style.background = color;
         }
 
         // Saved Color:
-        loadColorsFromCache() {
+        #loadColorsFromCache() {
           const saved = JSON.parse(
             localStorage.getItem('cached-colors') || '[]',
           );
@@ -139,36 +149,36 @@
             .map((defaultColor, key) => saved[key] || defaultColor);
         }
 
-        setSavedColors(colorBars) {
-          const currentlySavedColors = this.loadColorsFromCache();
+        #setSavedColors(colorBars) {
+          const currentlySavedColors = this.#loadColorsFromCache();
 
           colorBars.forEach((colorBar, key) => {
-            this.savedColors.set(colorBar, currentlySavedColors[key]);
+            this.#savedColors.set(colorBar, currentlySavedColors[key]);
             colorBar.style.background = currentlySavedColors[key];
 
             colorBar.addEventListener('click', () => {
-              if (this.isUpdatingMode) {
-                this.updateSavedColor(colorBar, key);
+              if (this.#isUpdatingMode) {
+                this.#updateSavedColor(colorBar, key);
               } else {
                 const rgbColors =
                   colorBar.style.background.match(/\d{1,3}(?=[,|)])/g);
 
-                this.setSelectedColor(this.rgbToHex(rgbColors));
+                this.#setSelectedColor(this.#rgbToHex(rgbColors));
               }
             });
           });
         }
 
-        getSavedColors() {
-          return /*loadColorsFromCache()*/;
+        #getSavedColors() {
+          return /*#loadColorsFromCache()*/;
         }
 
-        updateSavedColor(colorBar) {
+        #updateSavedColor(colorBar) {
           const currentlySelectedColor =
-            this.selectedColor.colorNameDisplay.textContent;
-          const currentlySavedColors = this.savedColors.values();
+            this.#selectedColor.colorNameDisplay.textContent;
+          const currentlySavedColors = this.#savedColors.values();
 
-          this.savedColors.set(colorBar, currentlySelectedColor);
+          this.#savedColors.set(colorBar, currentlySelectedColor);
           colorBar.style.background = currentlySelectedColor;
 
           localStorage.setItem(
