@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Color Picker</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/colorjoe@4.1.1/css/colorjoe.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/colorjoe@4.1.1/css/colorjoe.min.css" />
     <link rel="stylesheet" href="./src/css/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/colorjoe@4.1.1/dist/colorjoe.min.js"></script>
   </head>
@@ -27,10 +25,7 @@
             </div>
             <div class="info__saved-colors saved-colors">
               <div class="saved-colors__title">
-                <span
-                  class="mode-switch"
-                  title="GET: Click on saved color to set it as selected"
-                >
+                <span class="mode-switch" title="GET: Click on saved color to set it as selected">
                   🔺
                 </span>
                 Saved Colors
@@ -50,11 +45,6 @@
 
     <script>
       /**
-       * @todo Split code to small pure functions (methods)
-       * @todo Rewrite class more compactly
-       * @todo Add accesors for fileds related with colors instead of methods
-       * @todo Style switcher to look nice
-       * @todo Fix html and clean up CSS
        * @todo Add types to code
        * @todo Add background image from Build folder of my phone
        * @todo Add blurry-loading
@@ -63,7 +53,7 @@
 
       class ColorWidget {
         #isUpdatingMode;
-        
+
         #modeSwitch;
 
         #selectedColor;
@@ -86,8 +76,8 @@
           this.#colorPicker = colorjoe.rgb(widgetElement.colorPicker);
 
           // 2. Init with basic values:
-          this.#setSelectedColor('#3aebca');
-          this.#setSavedColors(widgetElement.savedColors.colorBars);
+          this.#setSelectedColorTo('#3aebca');
+          this.#setSavedColorsOf(widgetElement.savedColors.colorBars);
           this.#colorPicker.show();
 
           // 3. Event listeners:
@@ -106,34 +96,34 @@
           });
 
           this.#selectedColor.colorBar.addEventListener('click', () =>
-            this.#setSelectedColor(this.#selectedColor.lastPicked),
+            this.#setSelectedColorTo(this.#selectedColor.lastPicked),
           );
 
           this.#colorPicker.on('change', (colorData) => {
             const colorInHex = colorData.hex();
 
             this.#selectedColor.lastPicked = colorInHex;
-            this.#setSelectedColor(colorInHex);
+            this.#setSelectedColorTo(colorInHex);
           });
         }
 
-        #componentToHex(color) {
-          const colorInHex = Number(color).toString(16);
+        #getInHexValueOf(color) {
+          const valueInHex = Number(color).toString(16);
 
-          return colorInHex.length === 1 ? '0' + colorInHex : colorInHex;
+          return valueInHex.length === 1 ? '0' + valueInHex : valueInHex;
         }
 
-        #rgbToHex([r, g, b]) {
+        #convertRgbToHex([r, g, b]) {
           return (
             '#' +
-            this.#componentToHex(r) +
-            this.#componentToHex(g) +
-            this.#componentToHex(b)
+            this.#getInHexValueOf(r) +
+            this.#getInHexValueOf(g) +
+            this.#getInHexValueOf(b)
           );
         }
 
         // Selected Color:
-        #setSelectedColor(color) {
+        #setSelectedColorTo(color) {
           this.#selectedColor.colorNameDisplay.textContent = color;
           this.#selectedColor.colorBar.style.background = color;
         }
@@ -149,7 +139,7 @@
             .map((defaultColor, key) => saved[key] || defaultColor);
         }
 
-        #setSavedColors(colorBars) {
+        #setSavedColorsOf(colorBars) {
           const currentlySavedColors = this.#loadColorsFromCache();
 
           colorBars.forEach((colorBar, key) => {
@@ -163,17 +153,17 @@
                 const rgbColors =
                   colorBar.style.background.match(/\d{1,3}(?=[,|)])/g);
 
-                this.#setSelectedColor(this.#rgbToHex(rgbColors));
+                this.#setSelectedColorTo(this.#convertRgbToHex(rgbColors));
               }
             });
           });
         }
 
-        #getSavedColors() {
+        get savedColors() {
           return /*#loadColorsFromCache()*/;
         }
 
-        #updateSavedColor(colorBar) {
+        #updateSavedColorOf(colorBar) {
           const currentlySelectedColor =
             this.#selectedColor.colorNameDisplay.textContent;
           const currentlySavedColors = this.#savedColors.values();
@@ -204,4 +194,5 @@
       const colorWidget = new ColorWidget(widgetDOM);
     </script>
   </body>
+
 </html>
