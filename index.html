@@ -170,6 +170,7 @@
            * @type {Array<string>}
            */
           const saved = JSON.parse(localStorage.getItem('cached-colors') || '[]');
+          console.log(saved);
 
           return new Array(5)
             .fill('#3aebca')
@@ -216,13 +217,15 @@
            * @type {string}
            */
           const currentlySelectedColor = this.#selectedColor.colorNameDisplay.textContent;
-          /**
-           * @type {IterableIterator<string>}
-           */
-          const currentlySavedColors = this.#savedColors.values();
-
+          
           this.#savedColors.set(colorBar, currentlySelectedColor);
           colorBar.style.background = currentlySelectedColor;
+
+          
+          /**
+           * @type {Array<string>}
+           */
+          const currentlySavedColors = Array.from(this.#savedColors.values());
 
           localStorage.setItem('cached-colors', JSON.stringify(currentlySavedColors));
         }
