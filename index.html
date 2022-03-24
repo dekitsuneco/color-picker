@@ -8,41 +8,46 @@
     <title>Color Picker</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/colorjoe@4.1.1/css/colorjoe.min.css" />
     <link rel="stylesheet" href="./src/css/style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/colorjoe@4.1.1/dist/colorjoe.min.js"></script>
+    <script defer src="./src/js/load.js"></script>
   </head>
 
   <body>
     <div class="wrapper">
       <main class="main">
-        <div class="color-widget">
-          <div class="color-widget__picker"></div>
+        <div class="content">        
+          <div class="color-widget">
+            <div class="color-widget__picker"></div>
 
-          <div class="color-widget__info info">
-            <div class="info__selected-colors selected-colors">
-              <div class="selected-colors__title">Selected Color</div>
-              <div class="selected-colors__color-name">#ffffff</div>
-              <div class="selected-colors__color"></div>
-            </div>
-            <div class="info__saved-colors saved-colors">
-              <div class="saved-colors__title">
-                <span class="mode-switch" title="GET: Click on saved color to set it as selected">
-                  🔺
-                </span>
-                Saved Colors
+            <div class="color-widget__info info">
+              <div class="info__selected-colors selected-colors">
+                <div class="selected-colors__title">Selected Color</div>
+                <div class="selected-colors__color-name">#ffffff</div>
+                <div class="selected-colors__color"></div>
               </div>
-              <ul class="saved-colors__colors-list">
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
-                <li class="saved-colors__color"></li>
-              </ul>
+              <div class="info__saved-colors saved-colors">
+                <div class="saved-colors__title">
+                  <span class="mode-switch" title="GET: Click on saved color to set it as selected">
+                    🔺
+                  </span>
+                  Saved Colors
+                </div>
+                <ul class="saved-colors__colors-list">
+                  <li class="saved-colors__color"></li>
+                  <li class="saved-colors__color"></li>
+                  <li class="saved-colors__color"></li>
+                  <li class="saved-colors__color"></li>
+                  <li class="saved-colors__color"></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="loading-text"></div>
       </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/colorjoe@4.1.1/dist/colorjoe.min.js"></script>
     <script>
       /**
        * @todo Add background image from Build folder of my phone
@@ -221,7 +226,7 @@
           this.#savedColors.set(colorBar, currentlySelectedColor);
           colorBar.style.background = currentlySelectedColor;
 
-          
+
           /**
            * @type {Array<string>}
            */
