@@ -45,27 +45,70 @@
 
     <script>
       /**
-       * @todo Add types to code
        * @todo Add background image from Build folder of my phone
        * @todo Add blurry-loading
        * @todo Push to GitHub
        */
 
+      /**
+       * @param {string|number} color
+       * @returns {string}
+       */
+      function getInHexValueOf(color) {
+        const valueInHex = Number(color).toString(16);
+
+        return valueInHex.length === 1 ? `0${valueInHex}` : valueInHex;
+      }
+
+      /**
+       *
+       * @param {Array<string|number>} colors
+       * @returns {string}
+       */
+      function convertRgbToHex([red, green, blue]) {
+        /**
+         *@type {Array<number>} 
+         */
+        const [hexRed, hexGreen, hexBlue] = [getInHexValueOf(red), getInHexValueOf(green), getInHexValueOf(blue)];
+        return `#${hexRed}${hexGreen}${hexBlue}`;
+      }
+
+      /**
+       * @class
+       */
       class ColorWidget {
+        /**
+         * @property {boolean}
+         */
         #isUpdatingMode;
-
+      
+        /**
+         * @property {HTMLElement}
+         */
         #modeSwitch;
-
+      
+        /**
+         * @property {Object}
+         */
         #selectedColor;
-
+      
+        /**
+         * @property {Map}
+         */
         #savedColors;
-
+      
+        /**
+         * @property {Object}
+         */
         #colorPicker;
-
+      
+        /**
+         * @param {widgetDOM} widgetElement
+         */
         constructor(widgetElement) {
           // 1. Class state:
           this.#isUpdatingMode = false;
-
+        
           this.#modeSwitch = widgetElement.savedColors.modeSwitch;
           this.#selectedColor = {
             colorNameDisplay: widgetElement.selectedColor.name,
@@ -74,73 +117,75 @@
           };
           this.#savedColors = new Map();
           this.#colorPicker = colorjoe.rgb(widgetElement.colorPicker);
-
+        
           // 2. Init with basic values:
           this.#setSelectedColorTo('#3aebca');
           this.#setSavedColorsOf(widgetElement.savedColors.colorBars);
           this.#colorPicker.show();
-
+        
           // 3. Event listeners:
           this.#modeSwitch.addEventListener('click', () => {
             this.#isUpdatingMode = !this.#isUpdatingMode;
-
+          
             if (this.#isUpdatingMode) {
               this.#modeSwitch.textContent = '🔻';
-              this.#modeSwitch.title =
-                'UPDATE: Click on saved color to replace it with currently selected';
+              this.#modeSwitch.title = 'UPDATE: Click on saved color to replace it with currently selected';
             } else {
               this.#modeSwitch.textContent = '🔺';
-              this.#modeSwitch.title =
-                'GET: Click on saved color to set it as selected';
+              this.#modeSwitch.title = 'GET: Click on saved color to set it as selected';
             }
           });
-
-          this.#selectedColor.colorBar.addEventListener('click', () =>
-            this.#setSelectedColorTo(this.#selectedColor.lastPicked),
-          );
-
+        
+          this.#selectedColor.colorBar.addEventListener('click', () => this.#setSelectedColorTo(this.#selectedColor.      lastPicked));
+        
           this.#colorPicker.on('change', (colorData) => {
+            /**
+             * @type {string}
+             */
             const colorInHex = colorData.hex();
-
+          
             this.#selectedColor.lastPicked = colorInHex;
             this.#setSelectedColorTo(colorInHex);
           });
         }
-
-        #getInHexValueOf(color) {
-          const valueInHex = Number(color).toString(16);
-
-          return valueInHex.length === 1 ? '0' + valueInHex : valueInHex;
-        }
-
-        #convertRgbToHex([r, g, b]) {
-          return (
-            '#' +
-            this.#getInHexValueOf(r) +
-            this.#getInHexValueOf(g) +
-            this.#getInHexValueOf(b)
-          );
-        }
-
+      
         // Selected Color:
+        /**
+         * @property {Function}
+         * @param {string} color
+         * @returns {void}
+         */
         #setSelectedColorTo(color) {
           this.#selectedColor.colorNameDisplay.textContent = color;
           this.#selectedColor.colorBar.style.background = color;
         }
 
         // Saved Color:
-        #loadColorsFromCache() {
-          const saved = JSON.parse(
-            localStorage.getItem('cached-colors') || '[]',
-          );
+        /**
+         * @property {Function}
+         * @returns {Array<string>}
+         */
+        static #loadColorsFromCache() {
+          /**
+           * @type {Array<string>}
+           */
+          const saved = JSON.parse(localStorage.getItem('cached-colors') || '[]');
 
           return new Array(5)
             .fill('#3aebca')
             .map((defaultColor, key) => saved[key] || defaultColor);
         }
 
+        /**
+         * @property {Function}
+         * @param {NodeListOf<HTMLLIElement>} colorBars
+         * @returns {void}
+         */
         #setSavedColorsOf(colorBars) {
-          const currentlySavedColors = this.#loadColorsFromCache();
+          /**
+           * @type {Array<string>}
+           */
+          const currentlySavedColors = ColorWidget.#loadColorsFromCache();
 
           colorBars.forEach((colorBar, key) => {
             this.#savedColors.set(colorBar, currentlySavedColors[key]);
@@ -148,36 +193,52 @@
 
             colorBar.addEventListener('click', () => {
               if (this.#isUpdatingMode) {
-                this.#updateSavedColor(colorBar, key);
+                this.#updateSavedColorOf(colorBar);
               } else {
-                const rgbColors =
-                  colorBar.style.background.match(/\d{1,3}(?=[,|)])/g);
+                /**
+                 * @type {RegExpMatchArray}
+                 */
+                const rgbColors = colorBar.style.background.match(/\d{1,3}(?=[,|)])/g);
 
-                this.#setSelectedColorTo(this.#convertRgbToHex(rgbColors));
+                this.#setSelectedColorTo(convertRgbToHex(rgbColors));
               }
             });
           });
         }
 
-        get savedColors() {
-          return /*#loadColorsFromCache()*/;
-        }
-
+        /**
+         * @property {Function}
+         * @param {HTMLElement} colorBar
+         * @returns {void}
+         */
         #updateSavedColorOf(colorBar) {
-          const currentlySelectedColor =
-            this.#selectedColor.colorNameDisplay.textContent;
+          /**
+           * @type {string}
+           */
+          const currentlySelectedColor = this.#selectedColor.colorNameDisplay.textContent;
+          /**
+           * @type {IterableIterator<string>}
+           */
           const currentlySavedColors = this.#savedColors.values();
 
           this.#savedColors.set(colorBar, currentlySelectedColor);
           colorBar.style.background = currentlySelectedColor;
 
-          localStorage.setItem(
-            'cached-colors',
-            JSON.stringify(currentlySavedColors),
-          );
+          localStorage.setItem('cached-colors', JSON.stringify(currentlySavedColors));
         }
       }
 
+      /**
+       * @typedef {Object} DOMContainer
+       * @property {HTMLElement} container
+       * @property {HTMLElement} colorPicker
+       * @property {Object} selectedColor
+       * @property {Object} savedColors
+       */
+
+      /**
+       * @type {DOMContainer} widgetDOM
+       */
       const widgetDOM = {
         container: document.querySelector('.color-widget'),
         colorPicker: document.querySelector('.color-widget__picker'),
@@ -191,6 +252,9 @@
         },
       };
 
+      /**
+       * @type {ColorWidget}
+       */
       const colorWidget = new ColorWidget(widgetDOM);
     </script>
   </body>
