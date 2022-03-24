@@ -65,46 +65,46 @@
       class ColorWidget {
         constructor(widgetElement) {
           // 1. Class state:
-
-
-          // Caching DOM for selected color section:
           this.isUpdatingMode = false;
-          this.modeSwitch = document.querySelector('.mode-switch');
+
+          this.modeSwitch = widgetElement.savedColors.modeSwitch;
+          this.selectedColor = {
+            colorNameDisplay: widgetElement.selectedColor.name,
+            colorBar: widgetElement.selectedColor.colorBar,
+            lastPicked: '#3aebca',
+          };
+          this.savedColors = new Map();
+          this.colorPicker = colorjoe.rgb(widgetElement.colorPicker);
+
+          // 2. Init:
+          this.setSelectedColor('#3aebca');
+          this.setSavedColors(widgetElement.savedColors.colorBars);
+          this.colorPicker.show();
+
+          // 3. Event listeners:
           this.modeSwitch.addEventListener('click', () => {
             const icon = this.isUpdatingMode ? '🔺' : '🔻';
 
             this.isUpdatingMode = !this.isUpdatingMode;
             this.modeSwitch.textContent = icon;
           });
-
-          /**
-           * @todo Setter 
-           * @todo Getter 
-           */
-          this.selectedColor = {
-            colorNameDisplay: widgetElement.selectedColor.name,
-            colorBar: widgetElement.selectedColor.colorBar,
-            lastPicked: '#3aebca',
-          };
-          // * Reverse back to last picked from picker color on click.
           this.selectedColor.colorBar.addEventListener('click', () => this.setSelectedColor(this.selectedColor.lastPicked));
-          this.setSelectedColor('#3aebca');
-
-          // Save HTMLElements of saved colors and actual array of the corresponding colors
-          // in one object:
-          this.savedColors = new Map();
-          this.setSavedColors(widgetElement.savedColors.colorBars);
-
-          // Init color picker:
-          this.colorPicker = colorjoe.rgb(widgetElement.colorPicker);
-          this.colorPicker.show();
-
-          // * Remember last picked color from picker
-          // and update selected color title and bar.
           this.colorPicker.on('change', colorData => {
-            this.selectedColor.lastPicked = colorData.hex();
-            this.setSelectedColor(colorData.hex());
+            const colorInHex = colorData.hex();
+
+            this.selectedColor.lastPicked = colorInHex;
+            this.setSelectedColor(colorInHex);
           });
+        }
+
+        componentToHex(color) {
+          const colorInHex = Number(color).toString(16);
+          
+          return colorInHex.length === 1 ? '0' + colorInHex : colorInHex;
+        }
+
+        rgbToHex([r, g, b]) {
+          return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
         }
 
         // Selected Color:
@@ -117,30 +117,30 @@
         loadColorsFromCache() {
           const saved = JSON.parse(localStorage.getItem('cached-colors') || '[]');
 
-          return new Array(5).fill('#ffffff').map((defaultColor, index) => saved[index] || defaultColor);
+          return new Array(5).fill('#3aebca').map((defaultColor, key) => saved[key] || defaultColor);
         }
 
         setSavedColors(colorBars) {
-          const colors = this.loadColorsFromCache();
+          const currentlySavedColors = this.loadColorsFromCache();
 
           colorBars.forEach((colorBar, key) => {
-            this.savedColors.set(colorBar, colors[key]);
+            this.savedColors.set(colorBar, currentlySavedColors[key]);
 
-            colorBar.style.background = colors[key];
+            colorBar.style.background = currentlySavedColors[key];
 
             colorBar.addEventListener('mouseover', () => {
               if (!this.isUpdatingMode) {
-                this.setSelectedColor(colorBar.style.background/*colors[key]*/);
+                const rgbColors = colorBar.style.background.match(/\d{1,3}(?=[,|)])/g);
+
+                this.setSelectedColor(this.rgbToHex(rgbColors));
               }
             });
 
             colorBar.addEventListener('click', () => {
               if (this.isUpdatingMode) {
-                //this.savedColors.set(colorBar, this.selectedColor.colorNameDisplay.textContent);
-                //colorBar.style.background = this.selectedColor.colorNameDisplay.textContent;
                 this.updateSavedColor(colorBar, key);
               }
-            })
+            });
           });
         }
 
@@ -148,15 +148,17 @@
           return /*loadColorsFromCache()*/;
         }
 
-        updateSavedColor(colorBar, key) {
-          // Update Map
-          // Update cache
-          this.savedColors.set(colorBar, this.selectedColor.colorNameDisplay.textContent);
-          colorBar.style.background = this.selectedColor.colorNameDisplay.textContent;
+        updateSavedColor(colorBar) {
+          const currentlySelectedColor = this.selectedColor.colorNameDisplay.textContent;
+          const currentlySavedColors = this.savedColors.values();
 
-          localStorage.setItem('cached-colors', JSON.stringify(this.savedColors.values()));
+          this.savedColors.set(colorBar, currentlySelectedColor);
+          colorBar.style.background = currentlySelectedColor;
+
+          localStorage.setItem('cached-colors', JSON.stringify(currentlySavedColors));
         }
       }
+
 
       const widgetDOM = {
         container: document.querySelector('.color-widget'),
@@ -166,6 +168,7 @@
           colorBar: document.querySelector('.selected-colors__color'),
         },
         savedColors: {
+          modeSwitch: document.querySelector('.mode-switch'),
           colorBars: document.querySelectorAll('.saved-colors__color'),
         },
       };
