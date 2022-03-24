@@ -30,9 +30,9 @@
             </div>
             <div class="info__saved-colors saved-colors">
               <div class="saved-colors__title">
-                <div class="mode-switch">
+                <span class="mode-switch">
                   🔺
-                </div>
+                </span>
                 Saved Colors
               </div>
               <ul class="saved-colors__colors-list">
@@ -64,6 +64,8 @@
 
       class ColorWidget {
         constructor(widgetElement) {
+          // 1. Class state:
+
 
           // Caching DOM for selected color section:
           this.isUpdatingMode = false;
